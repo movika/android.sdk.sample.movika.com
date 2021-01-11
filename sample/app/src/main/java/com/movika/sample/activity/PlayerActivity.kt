@@ -14,13 +14,15 @@ import film.interactive.player.sdk.android.base.ui.InteractivePlayerView
 
 class PlayerActivity : AppCompatActivity() {
 
+    private lateinit var interactivePlayerView: InteractivePlayerView
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fullscreen)
-        val interactivePlayer: InteractivePlayerView = findViewById(R.id.interactivePlayer)
+        interactivePlayerView = findViewById(R.id.interactivePlayer)
         val eventContainer: ViewGroup = findViewById(R.id.eventContainer)
-        interactivePlayer.customEventContainer = eventContainer
+        interactivePlayerView.customEventContainer = eventContainer
         val config = Config(
             isLoop = true,
             isDebugMode = false,
@@ -30,15 +32,20 @@ class PlayerActivity : AppCompatActivity() {
             isSeekEnabled = false
         )
 
-        lifecycle.addObserver(interactivePlayer)
+        lifecycle.addObserver(interactivePlayerView)
 
         val loader: MovieBundleLoader = AsyncMovieBundleLoader()
         loader.load("https://asazin-cache.cdnvideo.ru/asazin/movika/prod/users/1/movie/10/manifest.json") {
             if (it.isComplete) {
                 Handler(Looper.getMainLooper()).post {
-                    interactivePlayer.run(it.data!!, config, savedInstanceState)
+                    interactivePlayerView.run(it.data!!, config, savedInstanceState)
                 }
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        interactivePlayerView.onSaveInstanceState(outState)
     }
 }
